@@ -4,13 +4,11 @@ package letscode.spboot3;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.Driver;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.util.Assert;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
 
@@ -35,13 +33,11 @@ public class LetscodeApplication_v1 {
     }
 }
 
-
-// THIS IS THE WRONG WAY
 @Slf4j
 class DefaultCustomerServices_v1 {
     private final JdbcTemplate template;
-    private final RowMapper<Organization_v1> organizationRowMapper =
-            (rs, rowNum) -> new Organization_v1(
+    private final RowMapper<Organization_Transaction> organizationRowMapper =
+            (rs, rowNum) -> new Organization_Transaction(
                     rs.getInt("ad_org_id"),
                     rs.getInt("ad_client_id"),
                     rs.getString("isActive"),
@@ -54,12 +50,12 @@ class DefaultCustomerServices_v1 {
         this.template = template;
     }
 
-    Collection<Organization_v1> getAllOrg() throws Exception {
+    Collection<Organization_Transaction> getAllOrg() throws Exception {
         var listOfOrganizations = this.template.query("select ad_org_id,ad_client_id,isActive,value,name,description from public.ad_org", this.organizationRowMapper);
         return listOfOrganizations;
     }
 
-    Organization_v1 add(int ad_org_id, int ad_client_id, String isActive, String value, String name, String description) {
+    Organization_Transaction add(int ad_org_id, int ad_client_id, String isActive, String value, String name, String description) {
         var al = new ArrayList<Map<String, Object>>();
         al.add(Map.of("id", Integer.class));
         var keyHolder = new GeneratedKeyHolder(al);
@@ -84,7 +80,7 @@ class DefaultCustomerServices_v1 {
         return null;
     }
 
-    Organization_v1 byId(Integer id){
+    Organization_Transaction byId(Integer id){
         return this.template.queryForObject("select ad_org_id,ad_client_id,isActive,value,name,description from public.ad_org where id=?", this.organizationRowMapper, id);
     }
 }
