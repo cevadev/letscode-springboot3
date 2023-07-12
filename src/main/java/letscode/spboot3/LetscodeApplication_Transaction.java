@@ -77,7 +77,9 @@ class DefaultCustomerServices_Transaction {
         });
     }
 
-    Organization_Transaction add(int ad_org_id, int ad_client_id, String isActive, String value, String name, String description) {
+    Organization_Transaction add(
+            int ad_org_id, int ad_client_id, String isActive, String value,
+            String name, String description) {
         return this.tt.execute(status -> {
             Assert.isTrue(!name.startsWith("WH"), "The name can not start with WH");
             var al = new ArrayList<Map<String, Object>>();
