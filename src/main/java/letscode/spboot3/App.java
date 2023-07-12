@@ -1,8 +1,11 @@
 package letscode.spboot3;
 
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.Driver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -14,8 +17,32 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+@Slf4j
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        var dataSource = new DriverManagerDataSource(
+                "jdbc:postgresql://localhost:5432/localtest",
+                "adempiere",
+                "adempiere"
+        );
+        dataSource.setDriverClassName(Driver.class.getName());
+        var template = new JdbcTemplate(dataSource);
+        template.afterPropertiesSet();
+
+        var ptm = new DataSourceTransactionManager(dataSource);
+        ptm.afterPropertiesSet();
+        var tt = new TransactionTemplate(ptm);
+        tt.afterPropertiesSet();
+
+        var cs = new TransactionalOrganizationService(template, tt);
+
+        var sandvik = cs.add(1000, 10, "T", "Store Central", "Store Central", "Garden World Store Central");
+        var fargo = cs.add(2000, 10, "T", "Store North", "Store North", "Garden World Store North");
+        var com = cs.add(3000, 10, "T", "WH North", "WH Store North", "Garden World Store North");
+
+        var allData = cs.getAllOrg();
+        Assert.state(allData.contains(sandvik) && allData.contains(fargo) && allData.contains(com), "we can not add the records successfully");
+        allData.forEach(org -> log.info(org .toString()));
 
     }
 }
